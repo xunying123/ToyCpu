@@ -56,10 +56,10 @@ reg [7:0] ins_out;
 integer i;
 
 always @(*) begin
-  data_input=0;
-  ins_out=0;
-  data_out=0;
-  data_in=0;
+  // data_input=0;
+  // ins_out=0;
+  // data_out=0;
+  // data_in=0;
 
     flag=!((1<=ins_remain && ins_remain<=3) || (ins_remain==5))&&data_remain;
     if(flag) begin

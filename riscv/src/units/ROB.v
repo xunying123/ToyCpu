@@ -115,14 +115,14 @@ always @(*) begin
     wrong=0;
     clear_o=0;
 
-    data3=0;
-    data3_RS=0;
-    data3_SLB=0;
-    index_bht2=0;
-    rd_commit=0;
-    rd_data_commit=0;
-    rd_busy_commit_=0;
-    pc_=0;
+    // data3=0;
+    // data3_RS=0;
+    // data3_SLB=0;
+    // index_bht2=0;
+    // rd_commit=0;
+    // rd_data_commit=0;
+    // rd_busy_commit_=0;
+    // pc_=0;
 
     if(!size);
     else begin

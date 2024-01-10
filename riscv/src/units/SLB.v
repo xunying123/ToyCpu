@@ -100,15 +100,15 @@ always @(*) begin
     SLB_ROB=0;
     SLB_RS=0;
 
-  //  data4=0;
-  //  return3=0;
-    slb_mem_order=0;
-    slb_mem_vj=0;
-    slb_mem_vk=0;
-    slb_mem_A=0;
-    data4_value=0;
-    data4_ready=0;
-    load_value=0;
+  //    data4=0;
+  //   return3=0;
+  //  slb_mem_order=0;
+  //   slb_mem_vj=0;
+  //   slb_mem_vk=0;
+  //   slb_mem_A=0;
+  //   data4_value=0;
+  //   data4_ready=0;
+  //   load_value=0;
 
     if(memctrl_data_ready) begin
       return3=ll;
