@@ -100,8 +100,8 @@ always @(*) begin
     SLB_ROB=0;
     SLB_RS=0;
 
-    data4=0;
-    return3=0;
+  //  data4=0;
+  //  return3=0;
     slb_mem_order=0;
     slb_mem_vj=0;
     slb_mem_vk=0;
