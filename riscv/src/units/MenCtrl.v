@@ -3,7 +3,7 @@ module MemCtrl(
     input wire clk,
     input wire rst,
     input wire rdy,
-    
+    input wire io_buffer_full,
     output reg w_r,
     output reg [31:0] addr_input,
     input wire [7:0] data_output,
@@ -30,6 +30,8 @@ module MemCtrl(
     input wire [31:0] slb_mem_A 
 
     );
+
+reg io_buffer_full_pre;
     
 reg [31:0] ins_addr;
 reg [3:0] ins_remain;
@@ -54,6 +56,11 @@ reg [7:0] ins_out;
 integer i;
 
 always @(*) begin
+  data_input=0;
+  ins_out=0;
+  data_out=0;
+  data_in=0;
+
     flag=!((1<=ins_remain && ins_remain<=3) || (ins_remain==5))&&data_remain;
     if(flag) begin
       if(data_l_s==0) begin
@@ -73,6 +80,8 @@ always @(*) begin
       end
 
       else begin
+
+        if(!((io_buffer_full_pre || io_buffer_full) && (data_addr==32'h30000 || data_addr==32'h30004))) begin
         if(data_current==0) begin
           data_in=data_in_m[7:0];
         end
@@ -97,7 +106,14 @@ always @(*) begin
           addr_input=0;
         end
       end
+
+      else begin
+        w_r=0;
+        addr_input=0;
+      end
     end
+  end
+
 
     else if(ins_remain) begin
       if(1<=ins_remain && ins_remain<=4) begin
@@ -137,6 +153,7 @@ always @(*) begin
 end
 
 always @(posedge clk) begin
+  io_buffer_full_pre<=io_buffer_full;
     if(rst) begin
         ins_addr<=0;
         ins_remain<=0;
@@ -151,12 +168,7 @@ always @(posedge clk) begin
         data_in_m<=0;
         data_ready<=0;
         data_l_s<=0;
-    
-        pos<=0;
-        flag<=0;
-        data_in<=0;
-        data_out<=0;
-        ins_out<=0;
+
      end
     
     else if(~rdy) begin
@@ -182,12 +194,6 @@ always @(posedge clk) begin
 
       if(flag) begin
         if(data_l_s==0) begin
-          if(data_remain==5) begin
-            data_remain<=0;
-            data_current<=0;
-            data_ready<=1;
-          end
-
           if(data_remain==4) begin
             data_remain<=3;
             data_current<=data_current+1;
@@ -212,6 +218,12 @@ always @(posedge clk) begin
             data_addr<=data_addr+1;
           end
 
+          if(data_remain==5) begin
+            data_remain<=0;
+            data_current<=0;
+            data_ready<=1;
+          end
+
 
           if(data_current==1) begin
             data_out_m[7:0]<=data_out;
@@ -231,6 +243,8 @@ always @(posedge clk) begin
         end
 
         else begin
+
+          if(!((io_buffer_full_pre || io_buffer_full) && (data_addr==32'h30000 || data_addr==32'h30004))) begin
           if(data_remain==4) begin
             data_remain<=3;
             data_current<=data_current+1;
@@ -256,13 +270,9 @@ always @(posedge clk) begin
           end
         end
       end
+    end
 
       else if(ins_remain) begin
-        if(ins_remain==5) begin
-          ins_remain<=0;
-          ins_current<=0;
-          ins_ready<=1;
-        end
 
         if(ins_remain==4) begin
           ins_remain<=3;
@@ -286,6 +296,12 @@ always @(posedge clk) begin
           ins_remain<=5;
           ins_current<=ins_current+1;
           ins_addr<=ins_addr+1;
+        end
+
+        if(ins_remain==5) begin
+          ins_remain<=0;
+          ins_current<=0;
+          ins_ready<=1;
         end
 
 

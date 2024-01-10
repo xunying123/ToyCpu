@@ -44,17 +44,15 @@ module RS(
 );
 
 
-reg [5:0] order[31:0];
-reg [31:0] pc[31:0];
-reg [31:0] topc[31:0];
-reg [31:0] A[31:0];
-reg [31:0] reorder[31:0];
-reg busy[31:0];
-reg [31:0] inst[31:0];
-reg [31:0] vj[31:0];
-reg [31:0] vk[31:0];
-reg [31:0] qj[31:0];
-reg [31:0] qk[31:0];
+reg [5:0] order[15:0];
+reg [31:0] pc[15:0];
+reg [31:0] A[15:0];
+reg [31:0] reorder[15:0];
+reg busy[15:0];
+reg [31:0] vj[15:0];
+reg [31:0] vk[15:0];
+reg [31:0] qj[15:0];
+reg [31:0] qk[15:0];
 
 integer i,j;
 
@@ -77,8 +75,14 @@ always @(*) begin
     RS_ROB2=0;
     RS_SLB=0;
 
+    data2=0;
+    data2_value=0;
+    data2_topc=0;
+    data2_ready=0;
+    slb_value=0;
+
     id=-1;
-    for(i=31;i>=0;i=i-1) begin
+    for(i=15;i>=0;i=i-1) begin
        if(busy[i] && qj[i]==-1 && qk[i]==-1) begin
          id=i;
        end
@@ -102,7 +106,7 @@ end
 
 always @(*) begin
     rs_unbusy=-1;
-    for(j=31;j>=0;j=j-1) begin
+    for(j=15;j>=0;j=j-1) begin
         if(!busy[j]) begin
             rs_unbusy=j;
         end
@@ -111,14 +115,12 @@ end
 
 always @(posedge clk) begin
     if(rst) begin
-      for(i=0;i<32;i=i+1) begin
+      for(i=0;i<16;i=i+1) begin
         order[i]<=0;
         pc[i]<=0;
-        topc[i]<=0;
         A[i]<=0;
         reorder[i]<=0;
         busy[i]<=0;
-        inst[i]<=0;
         vj[i]<=0;
         vk[i]<=0;
         qj[i]<=-1;
@@ -131,7 +133,7 @@ always @(posedge clk) begin
     end
 
     else if(clear) begin
-      for(i=0;i<32;i=i+1) begin
+      for(i=0;i<16;i=i+1) begin
         busy[i]<=0;
         qj[i]<=-1;
         qk[i]<=-1;
@@ -142,7 +144,7 @@ always @(posedge clk) begin
 
       if(id!=-1) begin
         busy[id]<=0;
-        for(i=0;i<32;i=i+1) begin
+        for(i=0;i<16;i=i+1) begin
           if(busy[i]) begin
             if(qj[i]==data2) begin
               qj[i]<=-1;
@@ -161,17 +163,15 @@ always @(posedge clk) begin
         vk[return2]<=rs_vk;
         qj[return2]<=rs_qj;
         qk[return2]<=rs_qk;
-        inst[return2]<=rs_inst;
         order[return2]<=rs_order;
         pc[return2]<=rs_pc;
-        topc[return2]<=rs_topc;
         A[return2]<=rs_A;
         reorder[return2]<=rs_reorder;
         busy[return2]<=rs_busy;
       end
 
       if(ROB_RS) begin
-        for(i=0;i<32;i=i+1) begin
+        for(i=0;i<16;i=i+1) begin
           if(busy[i]) begin
             if(qj[i]==data3) begin
               qj[i]<=-1;
@@ -186,7 +186,7 @@ always @(posedge clk) begin
       end
 
       if(SLB_RS) begin
-        for(i=0;i<32;i=i+1) begin
+        for(i=0;i<16;i=i+1) begin
           if(busy[i]) begin
             if(qj[i]==data4) begin
               qj[i]<=-1;

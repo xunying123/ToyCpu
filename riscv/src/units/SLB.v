@@ -61,17 +61,14 @@ module SLB (
 );
 
 
-reg [5:0] order[31:0];
-reg [31:0] inst[31:0];
-reg [31:0] vj[31:0];
-reg [31:0] vk[31:0];
-reg [31:0] qj[31:0];
-reg [31:0] qk[31:0];
-reg [31:0] pc[31:0];
-reg [31:0] topc[31:0];
-reg [31:0] A[31:0];
-reg [31:0] reorder[31:0];
-reg [31:0] ready[31:0];
+reg [5:0] order[15:0];
+reg [31:0] vj[15:0];
+reg [31:0] vk[15:0];
+reg [31:0] qj[15:0];
+reg [31:0] qk[15:0];
+reg [31:0] A[15:0];
+reg [31:0] reorder[15:0];
+reg ready[15:0];
 reg [31:0] ll,rr,size;
 reg waiting;
 
@@ -103,6 +100,16 @@ always @(*) begin
     SLB_ROB=0;
     SLB_RS=0;
 
+    data4=0;
+    return3=0;
+    slb_mem_order=0;
+    slb_mem_vj=0;
+    slb_mem_vk=0;
+    slb_mem_A=0;
+    data4_value=0;
+    data4_ready=0;
+    load_value=0;
+
     if(memctrl_data_ready) begin
       return3=ll;
       if(isload) begin
@@ -113,7 +120,6 @@ always @(*) begin
 
         SLB_RS=1;
         load_value=loaded;
-
         sub_size=1;
       end
 
@@ -121,7 +127,6 @@ always @(*) begin
         data4=reorder[return3];
         SLB_ROB=1;
         data4_ready=1;
-
         sub_size=1;
       end
     end
@@ -129,7 +134,7 @@ always @(*) begin
     if(!waiting&&size) begin
       return3=ll;
       if(isload) begin
-        if(qj[return3]==-1) begin
+        if(qj[return3]==-1 && ready[return3]) begin
           slb_load=1;
           slb_mem_order=order[return3];
             slb_mem_vj=vj[return3];
@@ -157,10 +162,8 @@ end
 
 always @(posedge clk) begin
     if(rst) begin
-      for(i=0;i<=32;i=i+1) begin
+      for(i=0;i<16;i=i+1) begin
         order[i]<=0;
-        pc[i]<=0;
-        inst[i]<=0;
         vj[i]<=0;
         qj[i]<=-1;
         qk[i]<=-1;
@@ -168,7 +171,6 @@ always @(posedge clk) begin
         A[i]<=0;
         reorder[i]<=0;
         ready[i]<=0;
-        inst[i]<=0;
       end
       ll<=1;
       rr<=0;
@@ -185,9 +187,11 @@ always @(posedge clk) begin
       rr<=0;
       size<=0;
       waiting<=0;
-      for(i=0;i<32;i=i+1) begin
+      for(i=0;i<16;i=i+1) begin
         qj[i]<=-1;
         qk[i]<=-1;
+        ready[i]<=0;
+        reorder[i]<=0;
       end
     end
 
@@ -197,10 +201,10 @@ always @(posedge clk) begin
       if(memctrl_data_ready) begin
         waiting<=0;
         if(isload) begin
-          ll<=(ll+1)%32;
+          ll<=(ll+1)%16;
           qj[ll]<=-1;
           qk[ll]<=-1;
-        for(i=0;i<32;i=i+1) begin
+        for(i=0;i<16;i=i+1) begin
             if(qj[i]==data4) begin
               qj[i]<=-1;
               vj[i]<=loaded;
@@ -214,7 +218,7 @@ always @(posedge clk) begin
         end
 
         else begin
-          ll<=(ll+1)%32;
+          ll<=(ll+1)%16;
           qj[ll]<=-1;
           qk[ll]<=-1;
         end
@@ -222,7 +226,7 @@ always @(posedge clk) begin
 
       if(!waiting&&size) begin
         if(isload) begin
-          if(qj[return3]==-1) begin
+          if(qj[return3]==-1 && ready[return3]) begin
             waiting<=1;
           end
         end
@@ -239,17 +243,15 @@ always @(posedge clk) begin
         vk[return1]<=slb_vk;
         qj[return1]<=slb_qj;
         qk[return1]<=slb_qk;
-        pc[return1]<=slb_pc;
         A[return1]<=slb_A;
         reorder[return1]<=slb_reorder;
         ready[return1]<=slb_ready;
         order[return1]<=slb_order;
-        inst[return1]<=slb_inst;
         rr<=slb_r_;
       end
 
       if(RS_SLB) begin
-        for(i=0;i<32;i=i+1) begin
+        for(i=0;i<16;i=i+1) begin
             if(qj[i]==data2) begin
               qj[i]<=-1;
               vj[i]<=slb_value;
@@ -263,7 +265,7 @@ always @(posedge clk) begin
       end
 
       if(ROB_SLB) begin
-        for(i=0;i<32;i=i+1) begin
+        for(i=0;i<16;i=i+1) begin
             if(qj[i]==data3) begin
               qj[i]<=-1;
               vj[i]<=data3_SLB;
@@ -277,7 +279,7 @@ always @(posedge clk) begin
       end
 
         if(ROB_SLB2) begin
-            for(i=0;i<32;i=i+1) begin
+            for(i=0;i<16;i=i+1) begin
                 if(reorder[i]==data3) begin
                   ready[i]<=1;
                 end

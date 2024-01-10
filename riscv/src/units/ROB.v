@@ -11,7 +11,7 @@ module ROB(
     output reg right,
     output reg wrong,
 
-    output reg [31:0] index_bht2,
+    output reg [7:0] index_bht2,
 
     output reg ROB_RS,
     output reg [31:0] data3_RS,
@@ -71,14 +71,14 @@ module ROB(
     input wire data4_ready 
 );
 
-reg [5:0] s_order[31:0];
-reg [31:0] s_inst[31:0];
-reg [31:0] s_pc[31:0];
-reg [31:0] s_topc[31:0];
-reg [31:0] s_value[31:0];
-reg [31:0] s_dest[31:0];
-reg s_ready[31:0];
-reg s_jump[31:0];
+reg [5:0] s_order[15:0];
+reg [31:0] s_inst[15:0];
+reg [31:0] s_pc[15:0];
+reg [31:0] s_topc[15:0];
+reg [31:0] s_value[15:0];
+reg [31:0] s_dest[15:0];
+reg s_ready[15:0];
+reg s_jump[15:0];
 reg [31:0] ll,rr,size;
 
 
@@ -97,6 +97,11 @@ Store store1(
     .is(store)
 );
 
+wire load;
+Load load1(
+    .order(s_order[data3]),
+    .is(load)
+);
 integer i,j;
 
 always @(*) begin
@@ -109,6 +114,15 @@ always @(*) begin
     right=0;
     wrong=0;
     clear_o=0;
+
+    data3=0;
+    data3_RS=0;
+    data3_SLB=0;
+    index_bht2=0;
+    rd_commit=0;
+    rd_data_commit=0;
+    rd_busy_commit_=0;
+    pc_=0;
 
     if(!size);
     else begin
@@ -137,7 +151,7 @@ always @(*) begin
           else begin
             if((s_value[data3]^s_jump[data3])==1 || s_order[data3]==`JALR) begin
               wrong=1;
-              index_bht2=s_inst[data3][11:0];
+              index_bht2=s_inst[data3][7:0];
               if(s_value[data3]) pc_=s_topc[data3];
               else pc_=s_pc[data3]+4;
               clear_o=1;
@@ -154,7 +168,7 @@ always @(*) begin
             end
             else begin
               right=1;
-              index_bht2=s_inst[data3][11:0];
+              index_bht2=s_inst[data3][7:0];
             end
           end
         end
@@ -171,8 +185,12 @@ always @(*) begin
       end
 
       else begin
-        if(!s_ready[data3]);
+        if(load&&!s_ready[data3]) begin
+          ROB_SLB2=1;
+        end
         else begin
+          if(!s_ready[data3]);
+          else begin
           sub_flag=1;
           ROB_Reg=1;
           rd_commit=s_dest[data3];
@@ -188,7 +206,7 @@ always @(*) begin
             ROB_SLB=1;
             data3_SLB=s_value[data3];
 
-
+        end
         end
       end
     end
@@ -205,7 +223,7 @@ end
 
 always @(posedge clk) begin
     if(rst) begin
-      for(i=0;i<32;i=i+1) begin
+      for(i=0;i<16;i=i+1) begin
         s_order[i]<=0;
         s_inst[i]<=0;
         s_pc[i]<=0;
@@ -229,7 +247,7 @@ always @(posedge clk) begin
       ll<=1;
       rr<=0;
       size<=0;
-      for(i=0;i<32;i=i+1) begin
+      for(i=0;i<16;i=i+1) begin
         s_ready[i]<=0;
       end
     end
@@ -243,21 +261,23 @@ always @(posedge clk) begin
         if(branch) begin
           if(!s_ready[data3]);
           else begin
-            ll<=(ll+1)%32;
+            ll<=(ll+1)%16;
           end
         end
 
         else if(store) begin
           if(!s_ready[data3]);
           else begin
-            ll<=(ll+1)%32;
+            ll<=(ll+1)%16;
           end
         end
 
         else begin
-          if(!s_ready[data3]);
+          if(load&&!s_ready[data3]);
           else begin
-            ll<=(ll+1)%32;
+            if(!s_ready[data3]);
+            else begin
+            ll<=(ll+1)%16;
           end
         end
       end
@@ -291,6 +311,9 @@ always @(posedge clk) begin
       
     end
 end
+
+end
+
 
 
 

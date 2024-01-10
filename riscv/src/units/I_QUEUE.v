@@ -22,7 +22,7 @@ module I_QUEUE(
     output reg [31:0] addr2,
     output reg [31:0] store_Inst,
 
-    output reg[31:0] index_bht,
+    output reg[7:0] index_bht,
     input wire bht_re,
 
     output reg [31:0] h1,
@@ -179,10 +179,16 @@ always @(*) begin
     Insq_Mem=0;
     Inq_Icache=0;
 
+    addr2=0;
+    store_Inst=0;
+    index_bht=0;
+    memctrl_ins_addr=0;
+    memctrl_remain=0;
+    j=0;
+
     if(!insq_waiting && size!=32) begin
       addr1=pc;
       hit=hit_icache_;
-      inst=return_inst;
 
       if(!hit) begin
         Insq_Mem=1;
@@ -190,6 +196,7 @@ always @(*) begin
         memctrl_remain=4;
       end
     end
+    else addr1=0;
 
     if(memctrl_ins_ready) begin
       inst=memctrl_ins_;
@@ -197,6 +204,8 @@ always @(*) begin
       addr2=pc;
       store_Inst=memctrl_ins_;
     end
+    else if(hit) inst=return_inst;
+      else inst=0;
 
     if(memctrl_ins_ready||hit) begin
       j=(rr+1)%32;
@@ -207,7 +216,7 @@ always @(*) begin
         else begin
           if(order==`JALR);
           else begin
-          index_bht=inst[11:0];
+          index_bht=inst[7:0];
         end
       end
     end
@@ -226,19 +235,58 @@ always @(*) begin
     ROB_add=0;
     Insq_REG=0;
 
+    h1=0;
+    h2=0;
+    data1=0;
+    rob_r_=0;
+    rob_pc_=0;
+    rob_inst_=0;
+    rob_order_=0;
+    rob_dest_=0;
+    rob_topc_=0;
+    rob_ready_=0;
+    rob_jump_=0;
+    return2=0;
+    rs_vj=0;
+    rs_vk=0;
+    rs_qj=0;
+    rs_qk=0;
+    rs_inst=0;
+    rs_pc=0;
+    rs_topc=0;
+    rs_A=0;
+    rs_reorder=0;
+    rs_order=0;
+    rs_busy=0;
+    return1=0;
+    slb_r_=0;
+    slb_pc=0;
+    slb_inst=0;
+    slb_order=0;
+    slb_reorder=0;
+    slb_vj=0;
+    slb_vk=0;
+    slb_qj=0;
+    slb_qk=0;
+    slb_A=0;
+    slb_ready=0;
+    rd_reorder=0; 
+    rd_busy=0;
+    
+
     if(size==0);
-    else if(rob_size==32);
+    else if(rob_size==16);
     else begin
       if(load || store) begin
-        if(slb_size==32) ;
+        if(slb_size==16) ;
         else begin
           Insq_SLB=1;
           Insq_ROB=1;
-          return1=(slb_r+1)%32;
+          return1=(slb_r+1)%16;
           slb_r_=return1;
           SLB_add=1;
 
-          data1=(rob_r+1)%32;
+          data1=(rob_r+1)%16;
           rob_r_=data1;
           ROB_add=1;
 
@@ -307,7 +355,7 @@ always @(*) begin
         return2=rs_unbusy;
         if(return2==-1);
         else begin
-          data1=(rob_r+1)%32;
+          data1=(rob_r+1)%16;
           sub_flag=1;
           Insq_ROB=1;
           rob_r_=data1;
@@ -459,10 +507,10 @@ always @(posedge clk) begin
 
     if(size==0);
 
-    else if(rob_size==32);
+    else if(rob_size==16);
     else begin
       if(store || load) begin
-        if(slb_size==32);
+        if(slb_size==16);
         else begin
           ll<=(ll+1)%32;
         end

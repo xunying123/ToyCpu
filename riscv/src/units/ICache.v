@@ -13,21 +13,21 @@ module ICache(
     
 );
 
-reg [31:0] cache [255:0];
-reg [26:0] tag [255:0];
-reg valid[255:0];
+reg [31:0] cache [127:0];
+reg [26:0] tag [127:0];
+reg valid[127:0];
 
 integer i;
 
-reg [7:0] temp1,temp2;
+reg [6:0] temp1,temp2;
 
 
 always @(*) begin
 
     return_inst=0;
     
-    temp1=addr1[7:0];
-    if(valid[temp1]==1 && tag[temp1]==addr1[31:8]) begin
+    temp1=addr1[6:0];
+    if(valid[temp1]&& tag[temp1]==addr1[31:7]) begin
         hit_icache=1;
         return_inst=cache[temp1];
     end
@@ -37,12 +37,12 @@ always @(*) begin
 end
 
 always @(*) begin
-    temp2=addr2[7:0];
+    temp2=addr2[6:0];
 end
 
 always @(posedge clk) begin
     if(rst) begin
-      for(i=0;i<256;i=i+1) begin
+      for(i=0;i<128;i=i+1) begin
         cache[i]<=0;
         tag[i]<=0;
         valid[i]<=0;
@@ -56,7 +56,7 @@ always @(posedge clk) begin
     else begin
         if(Inq_Icache) begin
             cache[temp2]<=store_Inst;
-            tag[temp2]<=addr2[31:8];
+            tag[temp2]<=addr2[31:7];
             valid[temp2]<=1;
         end
     end

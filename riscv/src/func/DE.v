@@ -30,7 +30,7 @@ always @(*) begin
       if(num1==7'h17) begin
         order=`AUIPC;
       end
-      imm={inst[31:12],12'h000};
+      imm={inst[31:12],12'b0};
     end
 
     if(num1==7'h33) begin
@@ -126,6 +126,10 @@ always @(*) begin
             end
         end
         imm={20'b0,inst[31:20]};
+
+        if(order==`SRAI) begin
+          imm[10]=0;
+        end
     end
 
     if(num1==7'h23) begin
@@ -138,12 +142,12 @@ always @(*) begin
         if(num2==3'h2) begin
             order=`SW;
         end
-        imm={20'b0,inst[31:25],inst[11:7]};
+        imm[31:0]={20'b0,inst[31:25],inst[11:7]};
     end
 
     if(num1==7'h6f) begin
         order=`JAL;
-        imm={11'b0,inst[31],inst[19:12],inst[20],inst[30:21],1'b0};
+        imm[31:0]={11'd0,inst[31],inst[19:12],inst[20],inst[30:21],1'b0};
     end
 
     if(num1==7'h63) begin
@@ -165,7 +169,7 @@ always @(*) begin
         if(num2==3'h7) begin
             order=`BGEU;
         end
-        imm={19'b0,inst[31],inst[7],inst[30:25],inst[11:8],1'b0};
+        imm[31:0]={19'd0,inst[31],inst[7],inst[30:25],inst[11:8],1'b0};
     end 
 
     if(order==`JALR||order==`LB||order==`LH||order==`LW||order==`LBU||order==`LHU) begin

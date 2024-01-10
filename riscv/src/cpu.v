@@ -54,7 +54,7 @@ wire [31:0] store_Inst;
 
 //   BranchJudge()
 //BHT
-wire [31:0] index_bht;
+wire [7:0] index_bht;
 wire bht_re;
 
 
@@ -146,7 +146,7 @@ wire [31:0] data3;
 //BHT
 wire wrong; // predict wrong
 wire right; // predict correct
-wire [31:0] index_bht2;
+wire [7:0] index_bht2;
 
 //RS
 wire ROB_RS;
@@ -333,7 +333,8 @@ I_QUEUE  I_QUEUE_inst (
     .slb_mem_order(slb_mem_order),
     .slb_mem_vj(slb_mem_vj),
     .slb_mem_vk(slb_mem_vk),
-    .slb_mem_A(slb_mem_A)
+    .slb_mem_A(slb_mem_A),
+    .io_buffer_full (io_buffer_full)
   );
 
   REG  REG_inst (

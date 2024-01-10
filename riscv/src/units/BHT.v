@@ -5,14 +5,14 @@ module BHT(
 
     input wire right,
     input wire wrong,
-    input wire [31:0] index_bht,
+    input wire [7:0] index_bht,
 
-    input wire [31:0] index_bht2,
+    input wire [7:0] index_bht2,
     output reg bht_re
     
 );
 
-reg bht[1<<12-1:0][1:0];
+reg bht[1<<8-1:0][1:0];
 
 integer i;
 
@@ -47,11 +47,11 @@ always @(*) begin
 
     if(right) begin
         flag=1;
-        if(bht[index_bht2][1]==0) begin
+        if(bht[index_bht2][0]==0) begin
             i1=0;
             i2=0;
         end
-        if(bht[index_bht2][1]==1) begin
+        if(bht[index_bht2][0]==1) begin
             i1=1;
             i2=1;
         end
@@ -60,7 +60,7 @@ end
 
 always @(posedge clk) begin
     if(rst) begin
-        for(i = 0; i < 1<<12; i = i + 1) begin
+        for(i = 0; i < 1<<8; i = i + 1) begin
             bht[i][0] <= 0;
             bht[i][1] <= 0;
         end
