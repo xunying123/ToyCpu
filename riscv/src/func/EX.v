@@ -10,65 +10,64 @@ module EX(
 );
 
 always @(*) begin
-    if(order==`LUI) value=A;
-    if(order==`AUIPC) value=A+pc;
-    if(order==`ADD) value=vj+vk;
-    if(order==`SUB) value=vj-vk;
-    if(order==`SLL) value=vj<<(vk&5'h1f);
-    if(order==`SLT) begin
-        if($signed(vj)<$signed(vk)) value=1;
-        else value=0;
-    end
-    if(order==`SLTU) begin
-        if(vj<vk) value=1;
-        else value=0;
-    end
-    if(order==`XOR) value=vj^vk;
 
-    if(order==`SRL)value=vj>>(vk&5'h1f);
-	if(order==`SRA)value=$signed(vj)>>(vk&5'h1f);
-	if(order==`OR)value=vj|vk;
-	if(order==`AND)value=vj&vk;
+	if(order==`JALR)topc=(vj+A)&(~1);
+    else topc=0;//for_latch
+    
+	if(order==`LUI)value=A;
+	else if(order==`AUIPC)value=pc+A;
 
-    if(order==`JALR) begin
-		topc=(vj+A)&(~1);
+	else if(order==`ADD)value=vj+vk;
+	else if(order==`SUB)value=vj-vk;
+	else if(order==`SLL)value=vj<<(vk&5'h1f);
+	else if(order==`SLT)value=($signed(vj)<$signed(vk))?1:0;
+	else if(order==`SLTU)value=(vj<vk)?1:0;
+	else if(order==`XOR)value=vj^vk;
+	else if(order==`SRL)value=vj>>(vk&5'h1f);
+	else if(order==`SRA)value=$signed(vj)>>(vk&5'h1f);
+	else if(order==`OR)value=vj|vk;
+	else if(order==`AND)value=vj&vk;
+
+	else if(order==`JALR) begin
 		value=pc+4;
 	end
-    
-    if(order==`ADDI)value=vj+A;
-	if(order==`SLTI)value=($signed(vj)<$signed(A))?1:0;
-	if(order==`SLTIU)value=(vj<A)?1:0;
-	if(order==`XORI)value=vj^A;
-	if(order==`ORI)value=vj|A;
-	if(order==`ANDI)value=vj&A;
-	if(order==`SLLI)value=vj<<A;
-	if(order==`SRLI)value=vj>>A;
-	if(order==`SRAI)value=$signed(vj)>>A;
+
+
+	else if(order==`ADDI)value=vj+A;
+	else if(order==`SLTI)value=($signed(vj)<$signed(A))?1:0;
+	else if(order==`SLTIU)value=(vj<A)?1:0;
+	else if(order==`XORI)value=vj^A;
+	else if(order==`ORI)value=vj|A;
+	else if(order==`ANDI)value=vj&A;
+	else if(order==`SLLI)value=vj<<A;
+	else if(order==`SRLI)value=vj>>A;
+	else if(order==`SRAI)value=$signed(vj)>>A;
 	
 
-	if(order==`JAL) begin
+	else if(order==`JAL) begin
 		value=pc+4;
 	end
 
 
-	if(order==`BEQ) begin
+	else if(order==`BEQ) begin
 		value=(vj==vk?1:0);
 	end
-	if(order==`BNE) begin
+	else if(order==`BNE) begin
 		value=(vj!=vk?1:0);
 	end
-	if(order==`BLT) begin
+	else if(order==`BLT) begin
 		value=($signed(vj)<$signed(vk)?1:0);
 	end
-	if(order==`BGE) begin
+	else if(order==`BGE) begin
 		value=($signed(vj)>=$signed(vk)?1:0);
 	end
-	if(order==`BLTU) begin
+	else if(order==`BLTU) begin
 		value=(vj<vk?1:0);
 	end
-	if(order==`BGEU) begin
+	else if(order==`BGEU) begin
 		value=(vj>=vk?1:0);
 	end
+	else value=0;//for_latch
 
 end
 

@@ -16,12 +16,45 @@ reg bht[1<<12-1:0][1:0];
 
 integer i;
 
+reg flag,i1,i2;
+
 always @(*) begin
-    if(bht[index_bht2[11:0]][1] == 0) begin
+    if(bht[index_bht][0] == 0) begin
         bht_re = 0;
     end
     else begin
         bht_re = 1;
+    end
+end
+
+
+always @(*) begin
+    i1=0;
+    i2=0;
+    flag=0;
+
+    if(wrong) begin
+        flag=1;
+        if(bht[index_bht2][1]==0) begin
+            i1=0;
+            i2=1;
+        end
+        if(bht[index_bht2][1]==1) begin
+            i1=1;
+            i2=0;
+        end
+    end
+
+    if(right) begin
+        flag=1;
+        if(bht[index_bht2][1]==0) begin
+            i1=0;
+            i2=0;
+        end
+        if(bht[index_bht2][1]==1) begin
+            i1=1;
+            i2=1;
+        end
     end
 end
 
@@ -32,44 +65,15 @@ always @(posedge clk) begin
             bht[i][1] <= 0;
         end
     end
-    else if(rdy) begin
-        if(right) begin
-            if(bht[index_bht[11:0]][0]==0 && bht[index_bht[11:0]][1]==0) begin
-                bht[index_bht[11:0]][0] <= 0;
-                bht[index_bht[11:0]][1] <= 0;
-            end
-            else if(bht[index_bht[11:0]][0]==1 && bht[index_bht[11:0]][1]==0) begin
-                bht[index_bht[11:0]][0] <= 0;
-                bht[index_bht[11:0]][1] <= 0;
-            end
-            else if(bht[index_bht[11:0]][0]==0 && bht[index_bht[11:0]][1]==1) begin
-                bht[index_bht[11:0]][0] <= 1;
-                bht[index_bht[11:0]][1] <= 1;
-            end
-            else if(bht[index_bht[11:0]][0]==1 && bht[index_bht[11:0]][1]==1) begin
-                bht[index_bht[11:0]][0] <= 1;
-                bht[index_bht[11:0]][1] <= 1;
-            
-            end
+    else if(~rdy) begin
+
+    end
+
+    else begin
+        if(flag) begin
+            bht[index_bht2][0]<=i1;
+            bht[index_bht2][1]<=i2;
         end
-        if(wrong) begin
-            if(bht[index_bht[11:0]][0]==0 && bht[index_bht[11:0]][1]==0) begin
-                bht[index_bht[11:0]][0] <= 1;
-                bht[index_bht[11:0]][1] <= 0;
-            end
-            else if(bht[index_bht[11:0]][0]==1 && bht[index_bht[11:0]][1]==0) begin
-                bht[index_bht[11:0]][0] <= 0;
-                bht[index_bht[11:0]][1] <= 1;
-            end
-            else if(bht[index_bht[11:0]][0]==0 && bht[index_bht[11:0]][1]==1) begin
-                bht[index_bht[11:0]][0] <= 1;
-                bht[index_bht[11:0]][1] <= 0;
-            end
-            else if(bht[index_bht[11:0]][0]==1 && bht[index_bht[11:0]][1]==1) begin
-                bht[index_bht[11:0]][0] <= 0;
-                bht[index_bht[11:0]][1] <= 1;
-            end
         end
     end
-end
 endmodule

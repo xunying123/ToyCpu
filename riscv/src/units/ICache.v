@@ -23,6 +23,9 @@ reg [7:0] temp1,temp2;
 
 
 always @(*) begin
+
+    return_inst=0;
+    
     temp1=addr1[7:0];
     if(valid[temp1]==1 && tag[temp1]==addr1[31:8]) begin
         hit_icache=1;

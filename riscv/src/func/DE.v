@@ -19,6 +19,9 @@ always @(*) begin
     rd=inst[11:7];
     rs1=inst[19:15];
     rs2=inst[24:20];
+
+    imm=0;
+    order=0;
     
     if(num1==7'h37 || num1==7'h17) begin
       if(num1==7'h37) begin
@@ -165,25 +168,25 @@ always @(*) begin
         imm={19'b0,inst[31],inst[7],inst[30:25],inst[11:8],1'b0};
     end 
 
-    if(order==`JALR || order==`LB || order==`LH || order==`LW || order==`LBU || order==`LHU) begin
-        if(imm>>11)imm=imm|32'hfffff000;
-    end
+    if(order==`JALR||order==`LB||order==`LH||order==`LW||order==`LBU||order==`LHU) begin
+		if(imm>>11)imm=imm|32'hfffff000;
+	end
 
-    if(order==`SB || order==`SH || order==`SW) begin
-        if(imm>>11)imm=imm|32'hfffff000;
-    end
+	if(order==`ADDI||order==`SLTI||order==`SLTIU||order==`XORI||order==`ORI||order==`ANDI) begin
+		if(imm[11])imm[31:12]=20'hfffff;
+	end
 
-    if(order==`BEQ || order==`BNE || order==`BLT || order==`BGE || order==`BLTU || order==`BGEU) begin
-        if(imm>>12)imm=imm|32'hffffe000;
-    end
+	if(order==`SB||order==`SH||order==`SW) begin
+		if(imm[11])imm[31:12]=20'hfffff;
+	end
 
-    if(order==`ADDI || order==`SLTI || order==`SLTIU || order==`XORI || order==`ORI || order==`ANDI) begin
-        if(imm>>11)imm=imm|32'hfffff000;
-    end
-
-    if(order==`JAL) begin
-        if(imm>>20)imm=imm|32'hfff00000;
-    end
+	if(order==`JAL) begin
+		if(imm[20])imm[31:21]=11'h7ff;
+	end
+    
+	if(order==`BEQ||order==`BNE||order==`BLT||order==`BGE||order==`BLTU||order==`BGEU) begin
+		if(imm[12])imm[31:13]=19'h7ffff;
+	end
    
 
 end
