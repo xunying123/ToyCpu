@@ -102,7 +102,7 @@ Load load1(
     .order(s_order[data3]),
     .is(load)
 );
-integer i,j;
+integer i;
 
 always @(*) begin
     sub_flag=0;
@@ -281,6 +281,7 @@ always @(posedge clk) begin
           end
         end
       end
+    end
 
 
       if(Insq_ROB) begin
@@ -312,7 +313,6 @@ always @(posedge clk) begin
     end
 end
 
-end
 
 
 
