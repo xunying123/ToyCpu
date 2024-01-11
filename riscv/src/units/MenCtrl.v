@@ -3,7 +3,6 @@ module MemCtrl(
     input wire clk,
     input wire rst,
     input wire rdy,
-    input wire io_buffer_full,
     output reg w_r,
     output reg [31:0] addr_input,
     input wire [7:0] data_output,
@@ -30,9 +29,6 @@ module MemCtrl(
     input wire [31:0] slb_mem_A 
 
     );
-
-reg io_buffer_full_pre;
-    
 reg [31:0] ins_addr;
 reg [3:0] ins_remain;
 reg [3:0] ins_current;
@@ -81,7 +77,6 @@ always @(*) begin
 
       else begin
 
-        if(!((io_buffer_full_pre || io_buffer_full) && (data_addr==32'h30000 || data_addr==32'h30004))) begin
         if(data_current==0) begin
           data_in=data_in_m[7:0];
         end
@@ -105,12 +100,6 @@ always @(*) begin
           w_r=0;
           addr_input=0;
         end
-      end
-
-      else begin
-        w_r=0;
-        addr_input=0;
-      end
     end
   end
 
@@ -153,7 +142,6 @@ always @(*) begin
 end
 
 always @(posedge clk) begin
-  io_buffer_full_pre<=io_buffer_full;
     if(rst) begin
         ins_addr<=0;
         ins_remain<=0;
@@ -244,7 +232,6 @@ always @(posedge clk) begin
 
         else begin
 
-          if(!((io_buffer_full_pre || io_buffer_full) && (data_addr==32'h30000 || data_addr==32'h30004))) begin
           if(data_remain==4) begin
             data_remain<=3;
             data_current<=data_current+1;
@@ -268,7 +255,7 @@ always @(posedge clk) begin
             data_current<=0;
             data_ready<=1;
           end
-        end
+        
       end
     end
 
