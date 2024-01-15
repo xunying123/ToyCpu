@@ -333,7 +333,8 @@ I_QUEUE  I_QUEUE_inst (
     .slb_mem_order(slb_mem_order),
     .slb_mem_vj(slb_mem_vj),
     .slb_mem_vk(slb_mem_vk),
-    .slb_mem_A(slb_mem_A)
+    .slb_mem_A(slb_mem_A),
+    .io_buffer_full(io_buffer_full)
   );
 
   REG  REG_inst (

@@ -12,7 +12,7 @@ module BHT(
     
 );
 
-reg bht[1<<8-1:0][1:0];
+reg bht[(1<<8)-1:0][1:0];
 
 integer i;
 

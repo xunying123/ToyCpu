@@ -1,3 +1,10 @@
+`define LB 6'd13
+`define LH 6'd14
+`define LW 6'd15
+`define LBU 6'd16
+`define LHU 6'd17
+
+
 
 module Load(
     input wire [5:0] order,

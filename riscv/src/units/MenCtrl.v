@@ -1,5 +1,19 @@
+`define LB 6'd13
+`define LH 6'd14
+`define LW 6'd15
+`define LBU 6'd16
+`define LHU 6'd17
+
+`define SB 6'd27
+`define SH 6'd28
+`define SW 6'd29
+
+
+
 
 module MemCtrl(
+  input wire io_buffer_full,
+
     input wire clk,
     input wire rst,
     input wire rdy,
@@ -34,7 +48,7 @@ reg [3:0] ins_remain;
 reg [3:0] ins_current;
 reg [31:0] ins_ret;
 reg ins_ready;
-
+reg io_buffer_full_r;
 
 reg [31:0] data_addr;
 reg [3:0] data_remain;
@@ -52,10 +66,10 @@ reg [7:0] ins_out;
 integer i;
 
 always @(*) begin
-  // data_input=0;
-  // ins_out=0;
-  // data_out=0;
-  // data_in=0;
+  data_input=0;
+  ins_out=0;
+  data_out=0;
+  data_in=0;
 
     flag=!((1<=ins_remain && ins_remain<=3) || (ins_remain==5))&&data_remain;
     if(flag) begin
@@ -77,29 +91,38 @@ always @(*) begin
 
       else begin
 
-        if(data_current==0) begin
-          data_in=data_in_m[7:0];
-        end
-        if(data_current==1) begin
-          data_in=data_in_m[15:8];
-        end
-        if(data_current==2) begin
-          data_in=data_in_m[23:16];
-        end
-        if(data_current==3) begin
-          data_in=data_in_m[31:24];
-        end
-
-        if(1<=data_remain && data_remain<=4) begin
-          w_r=1;
-          addr_input=data_addr[31:0];
-          data_input=data_in;
+        if(!((io_buffer_full_r || io_buffer_full) && (data_addr==32'h30000 || data_addr==32'h30004))) begin
+          if(data_current==0) begin
+            data_in=data_in_m[7:0];
+          end
+          if(data_current==1) begin
+            data_in=data_in_m[15:8];
+          end
+          if(data_current==2) begin
+            data_in=data_in_m[23:16];
+          end
+          if(data_current==3) begin
+            data_in=data_in_m[31:24];
+          end
+  
+          if(1<=data_remain && data_remain<=4) begin
+            w_r=1;
+            addr_input=data_addr[31:0];
+            data_input=data_in;
+          end
+  
+          else begin
+            w_r=0;
+            addr_input=0;
+          end
         end
 
         else begin
           w_r=0;
-          addr_input=0;
+            addr_input=0;
         end
+
+        
     end
   end
 
@@ -142,6 +165,7 @@ always @(*) begin
 end
 
 always @(posedge clk) begin
+  io_buffer_full_r<=io_buffer_full;
     if(rst) begin
         ins_addr<=0;
         ins_remain<=0;
@@ -232,30 +256,31 @@ always @(posedge clk) begin
 
         else begin
 
-          if(data_remain==4) begin
-            data_remain<=3;
-            data_current<=data_current+1;
-            data_addr<=data_addr+1;
-          end
-
-          if(data_remain==3) begin
-            data_remain<=2;
-            data_current<=data_current+1;
-            data_addr<=data_addr+1;
-          end
-
-          if(data_remain==2) begin
-            data_remain<=1;
-            data_current<=data_current+1;
-            data_addr<=data_addr+1;
-          end
-
-          if(data_remain==1) begin
-            data_remain<=0;
-            data_current<=0;
-            data_ready<=1;
-          end
-        
+           if(!((io_buffer_full_r || io_buffer_full) && (data_addr==32'h30000 || data_addr==32'h30004))) begin
+            if(data_remain==4) begin
+              data_remain<=3;
+              data_current<=data_current+1;
+              data_addr<=data_addr+1;
+            end
+  
+            if(data_remain==3) begin
+              data_remain<=2;
+              data_current<=data_current+1;
+              data_addr<=data_addr+1;
+            end
+  
+            if(data_remain==2) begin
+              data_remain<=1;
+              data_current<=data_current+1;
+              data_addr<=data_addr+1;
+            end
+  
+            if(data_remain==1) begin
+              data_remain<=0;
+              data_current<=0;
+              data_ready<=1;
+            end
+           end
       end
     end
 

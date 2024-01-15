@@ -1,3 +1,7 @@
+`define SB 6'd27
+`define SH 6'd28
+`define SW 6'd29
+
 
 module Store(
     input wire [5:0] order,

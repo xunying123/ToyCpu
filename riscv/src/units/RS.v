@@ -1,4 +1,5 @@
-
+`define JALR 6'd12
+`define JAL 6'd30
 
 module RS(
     input wire clk,
@@ -75,11 +76,11 @@ always @(*) begin
     RS_ROB2=0;
     RS_SLB=0;
 
-    // data2=0;
-    // data2_value=0;
-    // data2_topc=0;
-    // data2_ready=0;
-    // slb_value=0;
+    data2=0;
+    data2_value=0;
+    data2_topc=0;
+    data2_ready=0;
+    slb_value=0;
 
     id=-1;
     for(i=15;i>=0;i=i-1) begin
